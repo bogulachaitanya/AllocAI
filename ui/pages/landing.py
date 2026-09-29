@@ -20,7 +20,6 @@ def render() -> None:
             max-width: 100% !important;
             padding: 0 !important;
         }
-        
         /* 2. Hero 3D Wrapper */
         .hero-3d-wrapper {
             position: relative;
@@ -33,7 +32,6 @@ def render() -> None:
             overflow: hidden;
             background: #040810;
         }
-
         /* 3. Moving 3D Grid Background */
         .hero-3d-grid {
             position: absolute;
@@ -54,7 +52,6 @@ def render() -> None:
             0% { transform: rotateX(75deg) translateY(0); }
             100% { transform: rotateX(75deg) translateY(60px); }
         }
-
         /* 4. Glowing Orbs */
         .orb {
             position: absolute;
@@ -67,12 +64,10 @@ def render() -> None:
         .orb-1 { width: 400px; height: 400px; background: rgba(124, 58, 237, 0.4); top: 10%; left: 10%; animation-delay: 0s; }
         .orb-2 { width: 500px; height: 500px; background: rgba(59, 130, 246, 0.3); bottom: 10%; right: 5%; animation-delay: -5s; }
         .orb-3 { width: 300px; height: 300px; background: rgba(34, 211, 238, 0.3); top: 40%; left: 45%; animation-delay: -2s; }
-        
         @keyframes float-orb {
             0% { transform: translate(0, 0) scale(1); }
             100% { transform: translate(50px, -50px) scale(1.1); }
         }
-
         /* 5. Floating 3D Glass Cards */
         .floating-card {
             position: absolute;
@@ -91,17 +86,14 @@ def render() -> None:
         .floating-card-title { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #818CF8; margin-bottom: 8px; }
         .floating-card-value { font-size: 1.8rem; font-weight: 900; background: linear-gradient(135deg, #A5B4FC, #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .floating-card-sub { font-size: 0.8rem; color: #94A3B8; margin-top: 4px; }
-
         .fc-1 { top: 18%; left: 12%; animation-delay: 0s; transform: rotateY(15deg) rotateX(5deg); }
         .fc-2 { bottom: 25%; right: 10%; animation-delay: -2s; transform: rotateY(-15deg) rotateX(-5deg); }
         .fc-3 { top: 60%; left: 8%; animation-delay: -4s; transform: rotateY(20deg) rotateX(10deg); width: 200px; }
         .fc-4 { top: 12%; right: 15%; animation-delay: -6s; transform: rotateY(-10deg) rotateX(15deg); }
-
         @keyframes float-card {
             0%, 100% { transform: translateY(0) scale(1) translateZ(0); }
             50% { transform: translateY(-25px) scale(1.02) translateZ(30px); }
         }
-
         /* 6. Central Hero Content */
         .hero-center-content {
             position: relative;
@@ -121,7 +113,6 @@ def render() -> None:
         @keyframes fade-up {
             to { opacity: 1; transform: translateY(0); }
         }
-
         .hero-badge {
             display: inline-flex; align-items: center; gap: 8px;
             padding: 6px 18px; border-radius: 30px;
@@ -141,7 +132,6 @@ def render() -> None:
             font-size: 1.2rem; color: #94A3B8; line-height: 1.7;
             max-width: 600px; margin: 0 auto 2.5rem auto; font-weight: 400;
         }
-
         /* 7. Section Container for Rest of Page */
         .page-container {
             max-width: 1200px;
@@ -159,7 +149,6 @@ def render() -> None:
             <div class="orb orb-1"></div>
             <div class="orb orb-2"></div>
             <div class="orb orb-3"></div>
-            
             <!-- Floating Data Cards -->
             <div class="floating-card fc-1" style="animation-delay: 0s;">
                 <div class="floating-card-title">Employee Intelligence</div>
@@ -188,7 +177,6 @@ def render() -> None:
                 </div>
                 <div class="floating-card-sub">Multi-dimensional analysis</div>
             </div>
-
             <!-- Center Content -->
             <div class="hero-center-content">
                 <div class="hero-badge">
