@@ -318,6 +318,99 @@ def render() -> None:
 
     st.markdown("<div style='margin: 6rem 0;'></div>", unsafe_allow_html=True)
 
+    # ── The Core Advantage ────────────────────────────────────────────────────
+    st.markdown(
+        """
+        <div style="margin-bottom:3.5rem;">
+            <div style="font-size:0.85rem;font-weight:800;text-transform:uppercase;
+                        letter-spacing:0.15em;color:#6366F1;margin-bottom:1rem;text-align:center;">
+                The Core Advantage
+            </div>
+            <div style="font-size:2.2rem;font-weight:800;color:#F1F5F9;letter-spacing:-0.02em;text-align:center;">
+                Moving past the spreadsheet
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    col_adv1, col_adv2 = st.columns(2)
+    with col_adv1:
+        st.markdown(
+            """<div style="background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.2);
+                        border-radius:20px;padding:2.5rem;height:100%;">
+                <div style="font-size:1.4rem;font-weight:800;color:#FCA5A5;margin-bottom:1.5rem;
+                            display:flex;align-items:center;gap:12px;">
+                    <span style="font-size:1.8rem;">📉</span> Traditional Staffing
+                </div>
+                <div style="display:flex;flex-direction:column;gap:1rem;color:#94A3B8;font-size:1rem;">
+                    <div style="display:flex;gap:10px;"><span style="color:#F87171;">✖</span> Relying on static spreadsheets that go out of date immediately.</div>
+                    <div style="display:flex;gap:10px;"><span style="color:#F87171;">✖</span> Staffing based on "who you know" instead of who is best fit.</div>
+                    <div style="display:flex;gap:10px;"><span style="color:#F87171;">✖</span> Losing critical lessons and feedback as soon as a project ends.</div>
+                    <div style="display:flex;gap:10px;"><span style="color:#F87171;">✖</span> Wasting hours cross-referencing availability across departments.</div>
+                </div>
+            </div>""",
+            unsafe_allow_html=True,
+        )
+    with col_adv2:
+        st.markdown(
+            """<div style="background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.2);
+                        border-radius:20px;padding:2.5rem;height:100%;">
+                <div style="font-size:1.4rem;font-weight:800;color:#6EE7B7;margin-bottom:1.5rem;
+                            display:flex;align-items:center;gap:12px;">
+                    <span style="font-size:1.8rem;">📈</span> The AllocAI Way
+                </div>
+                <div style="display:flex;flex-direction:column;gap:1rem;color:#94A3B8;font-size:1rem;">
+                    <div style="display:flex;gap:10px;"><span style="color:#34D399;">✔</span> Real-time skill and availability mapping directly from HR data.</div>
+                    <div style="display:flex;gap:10px;"><span style="color:#34D399;">✔</span> Evidence-based recommendations driven by deterministic scoring.</div>
+                    <div style="display:flex;gap:10px;"><span style="color:#34D399;">✔</span> Capturing project outcomes into a permanent organisational memory.</div>
+                    <div style="display:flex;gap:10px;"><span style="color:#34D399;">✔</span> Composing optimal teams in seconds, completely free of bias.</div>
+                </div>
+            </div>""",
+            unsafe_allow_html=True,
+        )
+
+    st.markdown("<div style='margin: 6rem 0;'></div>", unsafe_allow_html=True)
+
+    # ── Built for your Role ───────────────────────────────────────────────────
+    st.markdown(
+        """
+        <div style="text-align:center;margin-bottom:3.5rem;">
+            <div style="font-size:2.2rem;font-weight:800;color:#F1F5F9;margin-bottom:0.5rem;letter-spacing:-0.02em;">
+                Built for every leader
+            </div>
+            <div style="color:#64748B;font-size:1.1rem;">
+                A single source of truth for resource management.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    roles = [
+        ("Engineering Managers", "🧑‍💻", "Build balanced teams with the exact technical skills required, ensuring no single point of failure in your software architecture."),
+        ("Project Managers", "📊", "Reduce project risk by staffing people who have a proven track record of delivering in your specific industry domain."),
+        ("HR Leaders", "🎯", "Keep a pulse on the evolving skill landscape of your organisation and identify critical skill gaps before they become bottlenecks."),
+    ]
+
+    col_r1, col_r2, col_r3 = st.columns(3)
+    for col, (title, icon, desc) in zip([col_r1, col_r2, col_r3], roles):
+        with col:
+            st.markdown(
+                f"""<div style="text-align:center;padding:1.5rem;">
+                    <div style="font-size:3rem;margin-bottom:1rem;">{icon}</div>
+                    <div style="font-size:1.15rem;font-weight:700;color:#E2E8F0;margin-bottom:0.75rem;">
+                        {title}
+                    </div>
+                    <div style="color:#94A3B8;font-size:0.9rem;line-height:1.6;">
+                        {desc}
+                    </div>
+                </div>""",
+                unsafe_allow_html=True,
+            )
+
+    st.markdown("<div style='margin: 6rem 0;'></div>", unsafe_allow_html=True)
+
     # ── Footer CTA ────────────────────────────────────────────────────────────
     st.markdown(
         """
