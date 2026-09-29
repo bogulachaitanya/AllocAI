@@ -11,8 +11,9 @@ import streamlit as st
 
 def render() -> None:
     # ── Advanced 3D CSS injected for the Landing Page ─────────────────────────
+    import textwrap
     st.markdown(
-        """
+        textwrap.dedent("""
         <style>
         /* 1. Reset container padding for full width impact */
         .main .block-container {
@@ -204,7 +205,7 @@ def render() -> None:
                 <div id="cta-container"></div>
             </div>
         </div>
-        """,
+        """),
         unsafe_allow_html=True,
     )
 
