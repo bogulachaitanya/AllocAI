@@ -7,19 +7,18 @@ AllocAI is a Streamlit-based application designed to revolutionize how teams are
 
 ## 📸 Screenshots & UI
 
-*(Note: Replace these placeholder paths with actual repository images when pushed)*
-
 ### 📊 Dashboard
 The high-level view of available talent and organizational memory.
 ![AllocAI Dashboard](assets/dashboard.png)
 
-### 📋 Staffing Request (Create Project)
-Extracts technical requirements from natural language descriptions.
-![Create Project Form](assets/create_project.png)
+### 📋 Staffing Request & Project Details
+Extracts technical requirements and skill constraints from natural language descriptions.
+![Project Details](assets/project_details.png)
 
-### 👥 Recommended Team
+### 👥 Candidate Analysis & Recommended Team
 The output of the AI constraints engine, maximizing skill coverage and factoring in past lessons.
-![Recommended Team](assets/recommended_team.png)
+![Candidate Analysis](assets/candidate_analysis.png)
+![Candidate Analysis 2](assets/candidate_analysis_2.png)
 
 ### 🧠 Hindsight Memory
 The learning loop: retaining outcomes and lessons from completed projects.
