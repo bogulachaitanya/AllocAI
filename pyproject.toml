@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "projectmind"
+version = "0.1.0"
+description = "AI-powered project staffing and organizational-memory system"
+requires-python = ">=3.12"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+exclude = [
+    ".git",
+    "__pycache__",
+    ".venv",
+    "build",
+    "dist",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "S",    # flake8-bandit (security)
+    "UP",   # pyupgrade
+    "N",    # pep8-naming
+    "ANN",  # flake8-annotations (type hints)
+    "C90",  # McCabe complexity
+    "PT",   # flake8-pytest-style
+    "RUF",  # Ruff-specific
+]
+ignore = [
+    "ANN101",   # missing type annotation for self
+    "ANN102",   # missing type annotation for cls
+    "S101",     # use of assert (acceptable in tests)
+    "B008",     # do not perform function calls in default arguments (FastAPI pattern)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "ANN", "S106"]
+"db/seed/*" = ["S311"]   # random in seed data is fine
+
+[tool.ruff.lint.isort]
+known-first-party = ["config", "db", "models", "schemas", "repositories", "services", "llm", "hindsight", "rag", "ui"]
+
+[tool.bandit]
+exclude_dirs = ["tests", ".venv", "db/seed"]
+skips = ["B101"]   # assert in tests
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+log_cli = true
+log_cli_level = "INFO"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]

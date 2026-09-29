@@ -1,0 +1,69 @@
+# Environment
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Ruff
+.ruff_cache/
+
+# MyPy
+.mypy_cache/
+
+# Data / DB
+*.db
+*.sqlite
+*.sqlite3
+chroma_db/
+chroma_data/
+
+# Streamlit
+.streamlit/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Uploaded files
+uploads/
+
+# Excel datasets (large binary, not tracked)
+*.xlsx
+*.xls
+
+# Intermediate tool outputs
+bandit.json
+ruff.txt
+pip_audit.json
+
+# Agent runtime directory
+.agents/
