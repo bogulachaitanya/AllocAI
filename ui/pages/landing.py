@@ -161,24 +161,31 @@ def render() -> None:
             
             <!-- Floating Data Cards -->
             <div class="floating-card fc-1" style="animation-delay: 0s;">
-                <div class="floating-card-title">Project Fit Engine</div>
-                <div class="floating-card-value">94.8%</div>
-                <div class="floating-card-sub">Accuracy in skill mapping</div>
+                <div class="floating-card-title">Employee Intelligence</div>
+                <div style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap;">
+                    <span style="background:rgba(99,102,241,0.2);padding:2px 6px;border-radius:4px;font-size:0.65rem;">Python</span>
+                    <span style="background:rgba(99,102,241,0.2);padding:2px 6px;border-radius:4px;font-size:0.65rem;">PostgreSQL</span>
+                </div>
+                <div class="floating-card-sub">Skills mapped dynamically</div>
             </div>
             <div class="floating-card fc-2" style="animation-delay: -2s;">
-                <div class="floating-card-title">Hindsight Memory</div>
-                <div class="floating-card-value">12k+</div>
-                <div class="floating-card-sub">Lessons recalled instantly</div>
+                <div class="floating-card-title">Organisational Memory</div>
+                <div style="font-size:1.2rem;font-weight:700;color:#A78BFA;margin-top:5px;line-height:1.2;">Lessons Recalled</div>
+                <div class="floating-card-sub">Applying past feedback</div>
             </div>
             <div class="floating-card fc-3" style="animation-delay: -4s;">
                 <div class="floating-card-title">Team Composition</div>
-                <div style="font-size:1.2rem;font-weight:700;color:#34D399;margin-top:5px;">Optimal Match Found</div>
-                <div class="floating-card-sub">Zero skill gaps detected</div>
+                <div style="font-size:1.2rem;font-weight:700;color:#34D399;margin-top:5px;line-height:1.2;">Optimal Match</div>
+                <div class="floating-card-sub">Complementary skills aligned</div>
             </div>
             <div class="floating-card fc-4" style="animation-delay: -6s;">
-                <div class="floating-card-title">Data Points</div>
-                <div class="floating-card-value">2.4M</div>
-                <div class="floating-card-sub">Employee variables analyzed</div>
+                <div class="floating-card-title">Project Fit Score</div>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:8px;">
+                    <div style="height:6px;width:100%;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;">
+                        <div style="height:100%;width:85%;background:linear-gradient(90deg,#6366F1,#3B82F6);"></div>
+                    </div>
+                </div>
+                <div class="floating-card-sub">Multi-dimensional analysis</div>
             </div>
 
             <!-- Center Content -->
