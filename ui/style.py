@@ -1,4 +1,4 @@
-﻿"""Global CSS injection for AllocAI — premium 3D glassmorphism SaaS theme.
+"""Global CSS injection for AllocAI — premium 3D glassmorphism SaaS theme.
 
 Design system:
   - Deep dark background (#070B14 → #0B1020)
@@ -62,6 +62,7 @@ html, body,
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
   background-color: var(--bg-deep) !important;
   color: var(--text-primary) !important;
+  overflow-x: hidden !important;
 }
 
 [data-testid="stAppViewContainer"] > .main {
@@ -70,7 +71,6 @@ html, body,
     radial-gradient(ellipse 60% 40% at 85% 90%,
     rgba(59,130,246,0.08) 0%, transparent 60%),
     linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-base) 50%, var(--bg-deep) 100%);
-  min-height: 100vh;
 }
 
 .main .block-container {
