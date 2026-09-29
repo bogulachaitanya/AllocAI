@@ -164,25 +164,41 @@ small, .stCaption { color: var(--text-muted) !important; }
 }
 
 /* ─── Form inputs ────────────────────────────────────────────────────────── */
+/* Override the baseweb wrapper backgrounds which default to white in light mode */
+[data-baseweb="base-input"],
+[data-baseweb="input"],
+[data-baseweb="textarea"] {
+  background-color: transparent !important;
+  border: none !important;
+}
+
+[data-testid="stTextInput"] > div > div > div,
+[data-testid="stTextArea"] > div > div > div,
+[data-testid="stNumberInput"] > div > div > div {
+  background-color: rgba(255,255,255,0.04) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: var(--radius-sm) !important;
+}
+
 [data-testid="stTextInput"] input,
 [data-testid="stTextArea"] textarea,
 [data-testid="stNumberInput"] input,
 [data-testid="stPasswordInput"] input {
-  background: rgba(255,255,255,0.04) !important;
-  border: 1px solid var(--glass-border) !important;
-  border-radius: var(--radius-sm) !important;
+  background-color: transparent !important;
   color: var(--text-primary) !important;
   font-family: 'Inter', sans-serif !important;
   font-size: 0.9rem !important;
   transition: var(--transition) !important;
 }
-[data-testid="stTextInput"] input:focus,
-[data-testid="stTextArea"] textarea:focus,
-[data-testid="stPasswordInput"] input:focus {
+
+[data-testid="stTextInput"] > div > div > div:focus-within,
+[data-testid="stTextArea"] > div > div > div:focus-within,
+[data-testid="stNumberInput"] > div > div > div:focus-within {
   border-color: var(--accent-indigo) !important;
   box-shadow: 0 0 0 3px rgba(99,102,241,0.2) !important;
-  background: rgba(255,255,255,0.06) !important;
+  background-color: rgba(255,255,255,0.08) !important;
 }
+
 input::placeholder, textarea::placeholder { color: var(--text-muted) !important; }
 
 /* ─── Selectbox ──────────────────────────────────────────────────────────── */
