@@ -1,7 +1,9 @@
-# 🧠 AllocAI
-**AI-Powered Staffing Intelligence & Organizational Memory**
+# 🧠 ALLOC
+**AI-Powered Project Staffing Intelligence & Organizational Memory**
 
-AllocAI is a Streamlit-based application designed to revolutionize how teams are staffed and how organizational knowledge is retained. It moves beyond traditional project management by explicitly focusing on the **Staffing Request Lifecycle**: extracting requirements, scoring employee fit, composing optimal teams, and capturing lessons learned for future recommendations.
+> *"Match the right people. Learn from every project."*
+
+ALLOC is a Streamlit-based application designed to revolutionize how teams are staffed and how organizational knowledge is retained. It moves beyond traditional project management by explicitly focusing on the **Staffing Request Lifecycle**: extracting requirements, scoring employee fit, composing optimal teams, and capturing lessons learned for future recommendations.
 
 ---
 
@@ -9,7 +11,7 @@ AllocAI is a Streamlit-based application designed to revolutionize how teams are
 
 ### 📊 Dashboard
 The high-level view of available talent and organizational memory.
-![AllocAI Dashboard](assets/dashboard.png)
+![ALLOC Dashboard](assets/dashboard.png)
 
 ### 📋 Staffing Request & Project Details
 Extracts technical requirements and skill constraints from natural language descriptions.

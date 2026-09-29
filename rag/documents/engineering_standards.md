@@ -1,4 +1,4 @@
-# Engineering Standards — ProjectMind Company Documentation
+# Engineering Standards — ALLOC Company Documentation
 
 ## Version: 2024.1
 ## Classification: Internal Use Only

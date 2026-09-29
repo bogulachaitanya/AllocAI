@@ -1,4 +1,4 @@
-"""All prompt templates for ProjectMind.
+"""All prompt templates for ALLOC.
 
 Templates use explicit instructions to prevent prompt injection and
 to prohibit fabrication of employee facts.
@@ -9,7 +9,7 @@ from __future__ import annotations
 # ── Project Requirement Extraction ───────────────────────────────────────────
 
 PROJECT_EXTRACTION_SYSTEM = """\
-You are a project requirements analyst for AllocAI, an AI-powered project staffing system.
+You are a project requirements analyst for ALLOC, an AI-powered project staffing system.
 Your task is to extract structured requirements from raw project descriptions.
 
 CRITICAL RULES:
@@ -46,7 +46,7 @@ PROJECT DESCRIPTION:
 # ── Team Composition Explanation ─────────────────────────────────────────────
 
 TEAM_EXPLANATION_SYSTEM = """\
-You are a staffing recommendation analyst for AllocAI.
+You are a staffing recommendation analyst for ALLOC.
 Your role is to explain why a specific team was recommended for a project.
 
 CRITICAL RULES:
@@ -89,7 +89,7 @@ If no Hindsight evidence was found, state: "No relevant organizational memory wa
 # ── Learning / Lesson Extraction ─────────────────────────────────────────────
 
 LESSON_EXTRACTION_SYSTEM = """\
-You are an organizational learning analyst for AllocAI.
+You are an organizational learning analyst for ALLOC.
 Your task is to extract reusable lessons from completed project outcomes.
 
 CRITICAL RULES:

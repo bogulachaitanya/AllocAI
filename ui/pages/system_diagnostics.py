@@ -47,7 +47,7 @@ def render() -> None:
 
         is_imported = emp_count == 200
 
-        st.write(f"**Source:** {'AllocAI Excel Dataset' if is_imported else 'Demo/Seed Data'}")
+        st.write(f"**Source:** {'ALLOC Excel Dataset' if is_imported else 'Demo/Seed Data'}")
         st.write(f"**Employees:** {emp_count}")
         st.write(f"**Projects:** {proj_count}")
         st.write(f"**Assignments:** {assign_count}")

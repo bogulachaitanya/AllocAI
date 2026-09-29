@@ -1,11 +1,10 @@
-"""Create Project page — accepts raw requirement, extracts structure, runs recommendation.
+"""Create Staffing Request page — HR-friendly 4-step staffing recommendation flow.
 
-Implements the Hindsight skill's Before/After demo requirement:
-  1. Run recommendation WITHOUT Hindsight (pure database + scoring).
-  2. Run recommendation WITH Hindsight (adds lessons, patterns, risks from memory).
-  3. Show the difference side-by-side.
-
-The Mock Mode banner is displayed whenever HINDSIGHT_ADAPTER=local.
+Flow:
+  Step 1 — Project Information (title, client, domain, duration)
+  Step 2 — Project Requirements (free-text description)
+  Step 3 — Team Size
+  Step 4 — Analyze & Recommend
 """
 
 from __future__ import annotations
@@ -20,44 +19,57 @@ from schemas.matching import ProjectFitWeights
 from schemas.project import StructuredRequirements
 from services.project_analyzer import ProjectAnalyzer
 from services.recommendation_engine import RecommendationEngine
-from ui.components.hindsight_banner import (
-    render_before_after_comparison,
-    render_hindsight_mode_banner,
-)
+from ui.components.hindsight_banner import render_hindsight_mode_banner
 from ui.components.team_card import render_recommended_team
 
 
 def render() -> None:
-    st.title("📋 Create Project & Get Recommendations")
-    st.caption("Describe your project requirements and let AllocAI find the right team.")
+    st.title("📋 Create Staffing Request")
+    st.caption("Describe your project and let AllocAI find the right team.")
 
-    # ── Hindsight mode banner (always visible) ────────────────────────────────
+    # ── Hindsight mode banner ─────────────────────────────────────────────────
     render_hindsight_mode_banner()
-
     st.divider()
 
-    # ── Current Staffing Request (from session) ──────────────────────────────
+    # ── Active staffing request indicator ────────────────────────────────────
     active_project_id = st.session_state.get("current_project_id")
     if active_project_id:
         with get_db() as session:
             active_project = session.get(Project, active_project_id)
             if active_project:
-                st.info(
-                    f"📁 **Current Request:** {active_project.title} (ID: {active_project.id})"
-                )
-                if st.button("Start New Project"):
-                    del st.session_state["current_project_id"]
-                    st.session_state.pop("last_recommended_team", None)
-                    st.session_state.pop("last_recommended_team_without_hindsight", None)
-                    st.rerun()
+                col_info, col_btn = st.columns([5, 1])
+                with col_info:
+                    st.info(
+                        f"📁 **Active Request:** {active_project.title}  "
+                        f"(ID: {active_project.id})"
+                    )
+                with col_btn:
+                    if st.button("🔄 New Request", type="secondary"):
+                        del st.session_state["current_project_id"]
+                        st.session_state.pop("last_recommended_team", None)
+                        st.rerun()
 
-    with st.form("project_form"):
-        st.subheader("Project Details")
+    # ══════════════════════════════════════════════════════════════════════════
+    # STEP 1 — Project Information
+    # ══════════════════════════════════════════════════════════════════════════
+    st.markdown(
+        "<div style='font-size:0.8rem;font-weight:700;text-transform:uppercase;"
+        "letter-spacing:0.08em;color:#58a6ff;margin-bottom:4px;'>Step 1 — Project Information"
+        "</div>",
+        unsafe_allow_html=True,
+    )
 
+    with st.form("staffing_request_form"):
         col1, col2 = st.columns(2)
         with col1:
-            title = st.text_input("Project Title *", placeholder="e.g. Fraud Detection Platform")
-            client = st.text_input("Client", placeholder="e.g. Meridian Financial")
+            title = st.text_input(
+                "Project Title *",
+                placeholder="e.g. AI-Powered Banking Assistant",
+            )
+            client = st.text_input(
+                "Client / Department",
+                placeholder="e.g. Meridian Financial",
+            )
         with col2:
             domain = st.selectbox(
                 "Domain",
@@ -73,43 +85,64 @@ def render() -> None:
                     "saas",
                 ],
             )
-            duration = st.number_input("Duration (weeks)", min_value=1, max_value=104, value=12)
+            duration = st.number_input(
+                "Estimated Duration (weeks)",
+                min_value=1,
+                max_value=104,
+                value=12,
+            )
 
-        col3, col4 = st.columns(2)
-        with col3:
-            team_size = st.number_input("Team Size", min_value=1, max_value=20, value=4)
-        with col4:
-            st.empty()  # keep layout balanced
+        st.divider()
 
-        st.subheader("Project Requirements")
+        # ══════════════════════════════════════════════════════════════════════
+        # STEP 2 — Project Requirements
+        # ══════════════════════════════════════════════════════════════════════
+        st.markdown(
+            "<div style='font-size:0.8rem;font-weight:700;text-transform:uppercase;"
+            "letter-spacing:0.08em;color:#58a6ff;margin-bottom:4px;'>Step 2 — Project Requirements"
+            "</div>",
+            unsafe_allow_html=True,
+        )
         raw_requirement = st.text_area(
             "Describe the project requirements *",
-            height=200,
+            height=180,
             placeholder=(
-                "e.g. We need to build a real-time fraud detection system for a major bank. "
-                "The system must process 10,000 transactions per second, detect anomalies using ML, "
-                "and integrate with our existing payment infrastructure. "
-                "We need senior Python engineers with ML experience and Kafka expertise."
+                "e.g. We need to build an AI-powered banking assistant for retail customers. "
+                "The system should use Python, NLP, FastAPI, SQL and AWS. "
+                "Candidates should have relevant banking or FinTech experience. "
+                "We need a strong ML engineer and a backend developer."
             ),
         )
 
-        st.subheader("⚙️ Options")
-        col_opt1, col_opt2 = st.columns(2)
-        with col_opt1:
-            show_before_after = st.checkbox(
-                "🔬 Show Before / After Hindsight comparison",
-                value=True,
-                help=(
-                    "Run the pipeline twice — once without Hindsight (baseline) and once with "
-                    "Hindsight — and show the difference side-by-side."
-                ),
+        st.divider()
+
+        # ══════════════════════════════════════════════════════════════════════
+        # STEP 3 — Team Size
+        # ══════════════════════════════════════════════════════════════════════
+        st.markdown(
+            "<div style='font-size:0.8rem;font-weight:700;text-transform:uppercase;"
+            "letter-spacing:0.08em;color:#58a6ff;margin-bottom:4px;'>Step 3 — Team Size"
+            "</div>",
+            unsafe_allow_html=True,
+        )
+        col_ts, col_adv = st.columns([1, 2])
+        with col_ts:
+            team_size = st.number_input(
+                "Requested Team Size *",
+                min_value=1,
+                max_value=20,
+                value=4,
+                help="The recommendation will return exactly this many people.",
             )
-        with col_opt2:
-            show_weights = st.checkbox("⚙️ Configure score weights", value=False)
+        with col_adv:
+            show_weights = st.checkbox(
+                "⚙️ Advanced: Configure scoring weights",
+                value=False,
+                help="Adjust the relative importance of each scoring criterion.",
+            )
 
         if show_weights:
-            st.subheader("Score Weights")
-            st.caption("Weights must sum to 1.0. Default weights are pre-filled.")
+            st.markdown("**Scoring Weights** *(must sum ≈ 1.0)*")
             col_w1, col_w2, col_w3, col_w4 = st.columns(4)
             w_skill = col_w1.slider("Skill Match", 0.0, 1.0, 0.30, 0.05)
             w_exp = col_w2.slider("Experience", 0.0, 1.0, 0.15, 0.05)
@@ -124,30 +157,41 @@ def render() -> None:
             w_skill, w_exp, w_proj, w_domain = 0.30, 0.15, 0.15, 0.10
             w_perf, w_avail, w_cert, w_collab = 0.10, 0.10, 0.05, 0.05
 
-        # We separate Create and Analyze actions
+        st.divider()
+
+        # ══════════════════════════════════════════════════════════════════════
+        # STEP 4 — Submit
+        # ══════════════════════════════════════════════════════════════════════
+        st.markdown(
+            "<div style='font-size:0.8rem;font-weight:700;text-transform:uppercase;"
+            "letter-spacing:0.08em;color:#58a6ff;margin-bottom:4px;'>Step 4 — Analyze & Recommend"
+            "</div>",
+            unsafe_allow_html=True,
+        )
         col_btn1, col_btn2 = st.columns(2)
         with col_btn1:
-            create_submitted = st.form_submit_button("💾 Create Project", type="primary")
+            create_submitted = st.form_submit_button("💾 Save Staffing Request", type="secondary")
         with col_btn2:
             analyze_submitted = st.form_submit_button(
-                "🔍 Analyze & Recommend Team", disabled="current_project_id" not in st.session_state
+                "🚀 Analyze & Find Team",
+                type="primary",
+                disabled="current_project_id" not in st.session_state,
             )
 
-    # ── Action: Create Project ────────────────────────────────────────────────
+    # ── Action: Create Staffing Request ──────────────────────────────────────
     if create_submitted:
         if not title.strip() or not raw_requirement.strip():
             st.error("Project title and requirements are required.")
             return
 
         with get_db() as session:
-            # Prevent duplicate creation if we already created it (simple title check or session state)
             existing = (
                 session.query(Project)
                 .filter(Project.title == title.strip(), Project.status == "draft")
                 .first()
             )
             if existing and st.session_state.get("current_project_id") == existing.id:
-                st.info(f"Project '{title}' already exists as Draft (ID: {existing.id}).")
+                st.info(f"Request '{title}' already exists (ID: {existing.id}).")
                 project_id = existing.id
             else:
                 project = Project(
@@ -160,22 +204,24 @@ def render() -> None:
                     team_size_max=team_size,
                     duration_weeks=duration,
                     raw_requirement=raw_requirement[:8000],
-                    structured_requirements="",  # Will be filled during analysis
+                    structured_requirements="",
                 )
                 session.add(project)
                 session.commit()
                 project_id = project.id
                 st.session_state["current_project_id"] = project_id
 
-        st.success("✅ Project created successfully!")
-        st.info(f"**Project ID:** {project_id} | **Name:** {title} | **Status:** Draft")
-        st.rerun()  # Rerun to enable the Analyze button
+        st.success(
+            f"✅ Staffing request saved — **{title}** (ID: {project_id})  \n"
+            "Click **Analyze & Find Team** to get recommendations."
+        )
+        st.rerun()
 
-    # ── Action: Analyze & Recommend Team ──────────────────────────────────────
+    # ── Action: Analyze & Recommend ───────────────────────────────────────────
     if analyze_submitted:
         project_id = st.session_state.get("current_project_id")
         if not project_id:
-            st.error("Please create a project first.")
+            st.error("Please save a staffing request first.")
             return
 
         weights = ProjectFitWeights(
@@ -192,73 +238,69 @@ def render() -> None:
         with get_db() as session:
             project = session.get(Project, project_id)
             if not project:
-                st.error("Project not found in database.")
+                st.error("Staffing request not found in database.")
                 return
 
-            # ── Step 1: Extract structured requirements ───────────────────────────────
-            with st.spinner("🔍 Extracting structured requirements…"):
-                analyzer = ProjectAnalyzer()
-                extracted: StructuredRequirements = analyzer.analyze(project.raw_requirement)
+            # ── Extract structured requirements ───────────────────────────
+            with st.spinner("🔍 Analyzing project requirements…"):
+                try:
+                    analyzer = ProjectAnalyzer()
+                    extracted: StructuredRequirements = analyzer.analyze(project.raw_requirement)
 
-                # Prioritize explicit UI input over LLM extracted output
-                update_dict = {
-                    "team_size_min": project.team_size_min,
-                    "team_size_max": project.team_size_max,
-                }
-                # Override form domain if LLM extracted "general"
-                if extracted.domain == "general" and project.domain != "general":
-                    update_dict["domain"] = project.domain
+                    # Honour user-selected team size and domain over LLM extraction
+                    update_dict: dict = {
+                        "team_size_min": project.team_size_min,
+                        "team_size_max": project.team_size_max,
+                    }
+                    if extracted.domain == "general" and project.domain != "general":
+                        update_dict["domain"] = project.domain
 
-                extracted = extracted.model_copy(update=update_dict)
+                    extracted = extracted.model_copy(update=update_dict)
+                    project.structured_requirements = json.dumps(extracted.model_dump())
+                    session.commit()
 
-                # Update project with extracted requirements
-                project.structured_requirements = json.dumps(extracted.model_dump())
-                session.commit()
+                except Exception as exc:
+                    st.warning(
+                        f"AI requirement extraction is temporarily unavailable ({exc}). "
+                        "Using project description directly."
+                    )
+                    extracted = StructuredRequirements(
+                        title=project.title or "Untitled",
+                        domain=project.domain or "general",
+                        required_skills=[],
+                        team_size_min=project.team_size_min or 1,
+                        team_size_max=project.team_size_max or 4,
+                    )
 
-            st.success("✅ Requirements extracted")
-            with st.expander("📋 Extracted Requirements (LLM Inference)"):
+            with st.expander("📋 Extracted Requirements (AI Analysis)", expanded=False):
                 st.info(
-                    "⚠️ The following was extracted by LLM — verify before relying on it as fact."
+                    "ℹ️ Requirements extracted by AI — verify before relying on as fact.",
+                    icon="ℹ️",
                 )
                 st.json(extracted.model_dump())
 
-            # ── Step 2: Run recommendations ───────────────────────────────────────────
-            engine = RecommendationEngine(session=session, weights=weights)
-
-            if show_before_after:
-                with st.spinner("⚙️ Step 1/2 — Recommendation WITHOUT Hindsight…"):
-                    rec_without = engine.recommend_without_hindsight(
-                        requirements=extracted,
-                        project=None,
+            # ── Run recommendation pipeline ───────────────────────────────
+            with st.spinner(
+                "👥 Finding candidates → Recalling organizational memory → Composing team…"
+            ):
+                try:
+                    engine = RecommendationEngine(session=session, weights=weights)
+                    rec = engine.recommend(requirements=extracted, project=project)
+                    project.recommendation_explanation = rec.explanation
+                    st.session_state["last_recommended_team"] = rec
+                    session.commit()
+                except Exception as exc:
+                    st.error(
+                        f"Recommendation pipeline encountered an error: {exc}  \n"
+                        "Please check your project requirements and try again."
                     )
+                    return
 
-                with st.spinner("🧠 Step 2/2 — Recommendation WITH Hindsight…"):
-                    rec_with = engine.recommend(requirements=extracted, project=project)
-
-                project.recommendation_explanation = rec_with.explanation
-                st.session_state["last_recommended_team"] = rec_with
-                st.session_state["last_recommended_team_without_hindsight"] = rec_without
-                session.commit()
-
-            else:
-                with st.spinner(
-                    "👥 Running pipeline (Filter → Score → Hindsight → RAG → Compose)…"
-                ):
-                    rec_with = engine.recommend(requirements=extracted, project=project)
-
-                project.recommendation_explanation = rec_with.explanation
-                st.session_state["last_recommended_team"] = rec_with
-                st.session_state.pop("last_recommended_team_without_hindsight", None)
-                rec_without = None
-                session.commit()
-
-        st.success(f"✅ Team recommended for Project {project_id}!")
+        # ── Display recommendation ────────────────────────────────────────
+        st.success(
+            f"✅ Recommendation complete — team of "
+            f"**{len(rec.recommended_team)}** found for *{rec.project_title}*"
+        )
         st.divider()
+        render_recommended_team(rec)
 
-        if show_before_after:
-            render_before_after_comparison(rec_without, rec_with)
-            st.divider()
-            st.markdown("### 🧠 Final Recommendation (With Hindsight)")
-            render_recommended_team(rec_with)
-        else:
-            render_recommended_team(rec_with)
