@@ -18,7 +18,8 @@ def init_db(seed: bool = True) -> None:
     import models.assignment
     import models.employee
     import models.outcome
-    import models.project  # noqa: F401
+    import models.project
+    import models.user  # noqa: F401
 
     Base.metadata.create_all(bind=engine)
     logger.info("Database tables created.")

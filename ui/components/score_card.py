@@ -1,4 +1,15 @@
-"""Score card component for displaying Project Fit Score."""
+"""Premium employee score card — glassmorphism design.
+
+Renders a full-featured employee card with:
+  - Name, role, seniority, department
+  - Project Fit score ring
+  - Progress bars (8 dimensions)
+  - Skill chips
+  - Previous experience
+  - Availability indicator
+
+Design: 3D glassmorphism consistent with ui/style.py
+"""
 
 from __future__ import annotations
 
@@ -7,95 +18,144 @@ import streamlit as st
 from schemas.matching import CandidateMatch
 
 
-def render_score_bar(score: float, label: str = "Project Fit Score") -> None:
-    """Render a color-coded progress bar for a score."""
-    pct = int(score * 100)
+def _score_color(pct: int) -> str:
     if pct >= 80:
-        color = "#2E7D32"  # green
+        return "#10B981"   # green
     elif pct >= 60:
-        color = "#F57C00"  # orange
+        return "#F59E0B"   # amber
     else:
-        color = "#C62828"  # red
+        return "#EF4444"   # red
 
+
+def _score_label(pct: int) -> str:
+    if pct >= 80:
+        return "Strong"
+    elif pct >= 60:
+        return "Good"
+    elif pct >= 40:
+        return "Moderate"
+    else:
+        return "Low"
+
+
+def _progress_bar(label: str, score: float, weight_label: str = "") -> str:
+    pct = int(score * 100)
+    color = _score_color(pct)
+    wt = f" <span style='color:#374151;font-size:0.68rem;'>({weight_label})</span>" if weight_label else ""
+    return f"""
+    <div style="margin:6px 0;">
+        <div style="display:flex;justify-content:space-between;font-size:0.75rem;
+                    font-weight:500;color:#94A3B8;margin-bottom:3px;">
+            <span>{label}{wt}</span>
+            <span style="color:{color};font-weight:700;">{pct}%</span>
+        </div>
+        <div class="alloc-progress-bar">
+            <div class="alloc-progress-fill" style="width:{pct}%;background:{color};"></div>
+        </div>
+    </div>"""
+
+
+def _chips(items: list[str], color: str = "#6366F1") -> str:
+    if not items:
+        return ""
+    chips = "".join(
+        f"<span class='alloc-chip'>{item}</span>"
+        for item in items[:8]
+    )
+    suffix = f"<span style='color:#374151;font-size:0.72rem;margin-left:4px;'>+{len(items)-8} more</span>" if len(items) > 8 else ""
+    return chips + suffix
+
+
+def render_score_bar(score: float, label: str = "Project Fit Score") -> None:
+    """Legacy compatibility — render a score bar via st.markdown."""
+    pct = int(score * 100)
+    color = _score_color(pct)
     st.markdown(
-        f"""<div style="margin:4px 0;">
-        <div style="display:flex;justify-content:space-between;font-size:0.85rem;">
-            <span>{label}</span><span style="font-weight:700;color:{color};">{pct}%</span>
-        </div>
-        <div style="background:#E0E0E0;border-radius:4px;height:8px;width:100%;">
-            <div style="background:{color};width:{pct}%;height:8px;border-radius:4px;"></div>
-        </div>
+        f"""<div style="margin:6px 0;">
+            <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:3px;">
+                <span style="color:#94A3B8;">{label}</span>
+                <span style="font-weight:700;color:{color};">{pct}%</span>
+            </div>
+            <div class="alloc-progress-bar">
+                <div class="alloc-progress-fill" style="width:{pct}%;background:{color};"></div>
+            </div>
         </div>""",
         unsafe_allow_html=True,
     )
 
 
-def render_candidate_score_card(candidate: CandidateMatch, show_details: bool = False) -> None:
-    """Render a full score card for a candidate."""
-    score_pct = int(candidate.project_fit_score * 100)
+def render_candidate_score_card(
+    candidate: CandidateMatch,
+    show_details: bool = False,
+) -> None:
+    """Render a premium glass employee card.
 
-    if score_pct >= 80:
-        border_color = "#2E7D32"
-    elif score_pct >= 60:
-        border_color = "#F57C00"
-    else:
-        border_color = "#C62828"
+    This is the primary component shown in Candidate Analysis.
+    Recommended Team uses render_employee_card_full().
+    """
+    score_pct = int(candidate.project_fit_score * 100)
+    color = _score_color(score_pct)
+    strength = _score_label(score_pct)
+
+    matched = candidate.skill_detail.matched_skills if candidate.skill_detail else []
+    missing = candidate.skill_detail.missing_skills if candidate.skill_detail else []
+
+    avail = getattr(candidate, "employee_availability_percentage", None)
+    avail_str = f"{avail}%" if avail is not None else "N/A"
 
     st.markdown(
-        f"""<div style="
-            border: 2px solid {border_color};
-            border-radius: 8px;
-            padding: 12px;
-            margin: 8px 0;
-        ">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-            <div>
-                <strong style="font-size:1.05rem;">{candidate.employee_name}</strong><br/>
-                <span style="color:#555;font-size:0.85rem;">
-                    {candidate.employee_role} · {candidate.employee_seniority.title()} ·
-                    {candidate.employee_department}
-                </span>
-            </div>
-            <div style="text-align:center;">
-                <div style="font-size:1.4rem;font-weight:800;color:{border_color};">
-                    {score_pct}%
+        f"""<div class="alloc-employee-card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:1.05rem;font-weight:800;color:#F1F5F9;
+                                white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                        {candidate.employee_name}
+                    </div>
+                    <div style="font-size:0.8rem;color:#64748B;margin-top:2px;">
+                        {candidate.employee_role} · {candidate.employee_seniority.title()} ·
+                        {candidate.employee_department}
+                    </div>
+                    <div style="margin-top:8px;">{_chips(matched)}</div>
                 </div>
-                <div style="font-size:0.7rem;color:#777;">Project Fit Score</div>
+                <div style="text-align:center;flex-shrink:0;">
+                    <div style="width:58px;height:58px;border-radius:50%;
+                                border:3px solid {color};
+                                display:flex;flex-direction:column;align-items:center;
+                                justify-content:center;gap:0;">
+                        <div style="font-size:1rem;font-weight:800;color:{color};line-height:1.1;">
+                            {score_pct}%
+                        </div>
+                    </div>
+                    <div style="font-size:0.65rem;color:#4B5563;margin-top:4px;font-weight:600;">
+                        {strength}
+                    </div>
+                    <div style="font-size:0.65rem;color:#374151;margin-top:1px;">
+                        Avail: {avail_str}
+                    </div>
+                </div>
             </div>
-        </div>
         </div>""",
         unsafe_allow_html=True,
     )
 
     if show_details:
-        with st.expander("Score Breakdown"):
+        with st.expander("📊 Score Breakdown & Details", expanded=False):
             bd = candidate.score_breakdown
-            render_score_bar(bd.skill_match_score, "Skill Match (30%)")
-            render_score_bar(bd.experience_match_score, "Experience Match (15%)")
-            render_score_bar(bd.relevant_project_experience_score, "Project Experience (15%)")
-            render_score_bar(bd.domain_expertise_score, "Domain Expertise (10%)")
-            render_score_bar(bd.past_project_performance_score, "Past Performance (10%)")
-            render_score_bar(bd.availability_score, "Availability (10%)")
-            render_score_bar(bd.certification_relevance_score, "Certifications (5%)")
-            render_score_bar(bd.collaboration_relevance_score, "Collaboration (5%)")
-
-        if candidate.skill_detail.matched_skills:
-            st.success(f"✅ **Current skills:** {', '.join(candidate.skill_detail.matched_skills)}")
-        if candidate.skill_detail.historical_matched:
-            st.info(
-                f"⏳ **Historical skills:** {', '.join(candidate.skill_detail.historical_matched)}"
+            st.markdown(
+                _progress_bar("Skill Match", bd.skill_match_score, "30%") +
+                _progress_bar("Experience", bd.experience_match_score, "15%") +
+                _progress_bar("Project Experience", bd.relevant_project_experience_score, "15%") +
+                _progress_bar("Domain Expertise", bd.domain_expertise_score, "10%") +
+                _progress_bar("Past Performance", bd.past_project_performance_score, "10%") +
+                _progress_bar("Availability", bd.availability_score, "10%") +
+                _progress_bar("Certifications", bd.certification_relevance_score, "5%") +
+                _progress_bar("Collaboration", bd.collaboration_relevance_score, "5%"),
+                unsafe_allow_html=True,
             )
-
-        effective_coverage = (
-            candidate.effective_skill_coverage or candidate.skill_detail.matched_skills
-        )
-        if effective_coverage:
-            st.caption(f"🛡️ **Effective skill coverage:** {', '.join(effective_coverage)}")
-
-        if candidate.skill_detail.missing_skills:
-            st.warning(f"⚠️ **Missing skills:** {', '.join(candidate.skill_detail.missing_skills)}")
-        if candidate.risks:
-            for risk in candidate.risks:
-                st.error(f"🚨 {risk}")
-        if candidate.recommendation_rationale:
-            st.caption(f"ℹ️ {candidate.recommendation_rationale}")
+            if missing:
+                st.warning(f"**Missing skills:** {', '.join(missing)}", icon="⚠️")
+            if candidate.risks:
+                for risk in candidate.risks:
+                    st.error(f"• {risk}", icon="🚨")
+            if candidate.recommendation_rationale:
+                st.caption(f"ℹ️ {candidate.recommendation_rationale}")

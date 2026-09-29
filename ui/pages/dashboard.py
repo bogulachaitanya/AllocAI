@@ -1,56 +1,56 @@
-"""Dashboard page — Organizational Staffing Intelligence.
+"""Dashboard page — AllocAI Workspace Overview.
 
-Metrics shown (real database data only):
-  - Total Employees
-  - Available Employees
-  - Staffing Requests (all stored projects)
-  - Completed Projects (with recorded outcomes)
-  - Hindsight Memories
-  - Recent Project Outcomes
-  - Recent Organizational Learning
+Metrics come exclusively from real database data.
+No hard-coded numbers. No fabricated statistics.
 
-NOT shown:
-  - Active Projects (this is a staffing tool, not a PM tracker)
-  - Fabricated or hard-coded numbers
+Shows:
+  - KPI metric cards (employees, availability, requests, completed, memories)
+  - CTA hero card (Create Staffing Request)
+  - Staffing workflow visual
+  - Recent project outcomes
+  - Pipeline architecture expandable
 """
 
 from __future__ import annotations
 
 import streamlit as st
 
-from db.session import get_db
-from hindsight.adapter import get_hindsight_adapter
-from repositories.employee_repo import EmployeeRepository
-from repositories.outcome_repo import OutcomeRepository
-from repositories.project_repo import ProjectRepository
-
 
 def render() -> None:
-    # ── Hero header ───────────────────────────────────────────────────────────
+    # ── CTA Hero Card ─────────────────────────────────────────────────────────
     st.markdown(
         """
-        <div style="padding: 2rem 0 1rem 0;">
-            <div style="font-size:2.4rem;font-weight:800;letter-spacing:-0.03em;
-                        background:linear-gradient(135deg,#58a6ff,#a371f7);
-                        -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-                        background-clip:text;line-height:1.1;">
-                AllocAI
+        <div style="background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(59,130,246,0.1));
+                    border:1px solid rgba(99,102,241,0.25);border-radius:18px;
+                    padding:2rem 2.5rem;margin-bottom:1.5rem;
+                    box-shadow:0 0 30px rgba(99,102,241,0.08);">
+            <div style="font-size:1.3rem;font-weight:800;color:#F1F5F9;margin-bottom:0.5rem;">
+                Need to build a project team?
             </div>
-            <div style="font-size:1.1rem;font-weight:600;color:#8b949e;margin-top:4px;">
-                AI Project Staffing Intelligence & Organizational Memory
-            </div>
-            <div style="font-size:0.9rem;color:#6e7681;margin-top:4px;font-style:italic;">
-                "Match the right people. Learn from every project."
+            <div style="color:#94A3B8;font-size:0.9rem;max-width:520px;line-height:1.6;margin-bottom:1.25rem;">
+                Describe your project requirements and AllocAI will identify suitable people
+                using your organisation's employee data and organisational memory.
             </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
+    col_cta, col_rest = st.columns([1, 3])
+    with col_cta:
+        if st.button("📋 Create Staffing Request", type="primary", use_container_width=True, key="dash_cta"):
+            st.session_state["selected_page"] = "create_project"
+            st.rerun()
 
     st.divider()
 
     # ── Load real data ────────────────────────────────────────────────────────
     try:
+        from db.session import get_db
+        from hindsight.adapter import get_hindsight_adapter
+        from repositories.employee_repo import EmployeeRepository
+        from repositories.outcome_repo import OutcomeRepository
+        from repositories.project_repo import ProjectRepository
+
         with get_db() as session:
             emp_repo = EmployeeRepository(session)
             proj_repo = ProjectRepository(session)
@@ -70,7 +70,7 @@ def render() -> None:
                 for o in recent_outcomes
             ]
     except Exception as exc:
-        st.error(f"Unable to load dashboard data: {exc}")
+        st.error(f"Unable to load workspace data. Please try again. ({exc})")
         return
 
     try:
@@ -82,18 +82,23 @@ def render() -> None:
     # ── KPI row ───────────────────────────────────────────────────────────────
     col1, col2, col3, col4, col5 = st.columns(5)
     col1.metric("👤 Total Employees", total_employees)
-    col2.metric("✅ Available Now", available_employees)
+    col2.metric("✅ Available", available_employees)
     col3.metric("📋 Staffing Requests", total_projects)
-    col4.metric("🏁 Completed Projects", completed_projects)
-    col5.metric("🧠 Organizational Memories", memory_count)
+    col4.metric("🏁 Completed", completed_projects)
+    col5.metric("🧠 Org Memories", memory_count)
 
     st.divider()
 
-    # ── Two column layout ─────────────────────────────────────────────────────
+    # ── Two-column layout ─────────────────────────────────────────────────────
     col_left, col_right = st.columns([3, 2])
 
     with col_left:
-        st.subheader("🕐 Recent Project Outcomes")
+        st.markdown(
+            """<div style="font-size:1rem;font-weight:700;color:#F1F5F9;margin-bottom:0.75rem;">
+                🕐 Recent Project Outcomes
+            </div>""",
+            unsafe_allow_html=True,
+        )
         if recent_outcomes_data:
             for outcome in recent_outcomes_data:
                 status_icon = {
@@ -103,56 +108,68 @@ def render() -> None:
                     "cancelled": "🚫",
                 }.get(outcome["outcome_status"], "❓")
                 rating = outcome["quality_rating"]
-                rating_str = f"{rating:.1f}/5.0" if rating is not None else "N/A"
+                rating_str = f"{rating:.1f}/5.0" if rating is not None else "Not rated"
                 st.markdown(
-                    f"<div style='padding:8px 12px;border-left:3px solid #30363d;"
-                    f"margin:4px 0;background:rgba(255,255,255,0.02);border-radius:0 6px 6px 0;'>"
-                    f"{status_icon} <b>Project {outcome['project_id']}</b> — "
-                    f"{outcome['outcome_status']} · Quality: {rating_str}"
-                    f"</div>",
+                    f"""<div style="padding:10px 14px;border-left:3px solid rgba(99,102,241,0.4);
+                               margin:5px 0;background:rgba(255,255,255,0.02);
+                               border-radius:0 8px 8px 0;">
+                        {status_icon} <b style="color:#E2E8F0;">Project {outcome['project_id']}</b>
+                        <span style="color:#64748B;font-size:0.82rem;"> — {outcome['outcome_status']} ·
+                        Quality: {rating_str}</span>
+                    </div>""",
                     unsafe_allow_html=True,
                 )
         else:
-            st.info(
-                "No project outcomes recorded yet.  \n"
-                "Use **Learning Center** after a project completes to capture lessons."
+            st.markdown(
+                """<div class="alloc-glass" style="padding:1.5rem;text-align:center;">
+                    <div style="font-size:1.5rem;margin-bottom:0.5rem;">📂</div>
+                    <div style="color:#64748B;font-size:0.85rem;">
+                        No project outcomes recorded yet.<br>
+                        Use <b>Learning Center</b> after a project completes to capture lessons.
+                    </div>
+                </div>""",
+                unsafe_allow_html=True,
             )
 
     with col_right:
-        st.subheader("💡 Staffing Workflow")
+        st.markdown(
+            """<div style="font-size:1rem;font-weight:700;color:#F1F5F9;margin-bottom:0.75rem;">
+                🔄 Staffing Workflow
+            </div>""",
+            unsafe_allow_html=True,
+        )
         steps = [
-            ("1", "Create Staffing Request", "Describe your project needs"),
-            ("2", "Analyze Requirements", "AI extracts structured requirements"),
-            ("3", "Find Suitable People", "Scored against current & historical data"),
-            ("4", "Recall Organizational Memory", "Hindsight surfaces relevant lessons"),
-            ("5", "Get Recommended Team", "Complementary team sized to your request"),
-            ("6", "Record Project Learning", "Capture outcomes to improve future staffing"),
+            ("01", "Create Staffing Request", "Describe project needs"),
+            ("02", "Analyse Requirements", "AI extracts structured needs"),
+            ("03", "Find Relevant People", "Scored against employee data"),
+            ("04", "Recall Org Memory", "Hindsight surfaces lessons"),
+            ("05", "Get Recommended Team", "Optimal team composed"),
+            ("06", "Record Learning", "Outcomes improve future staffing"),
         ]
         for num, title, desc in steps:
             st.markdown(
-                f"<div style='display:flex;align-items:flex-start;gap:10px;"
-                f"padding:6px 0;border-bottom:1px solid rgba(48,54,61,0.5);'>"
-                f"<div style='min-width:20px;height:20px;border-radius:50%;"
-                f"background:linear-gradient(135deg,#1f6feb,#388bfd);"
-                f"display:flex;align-items:center;justify-content:center;"
-                f"font-size:0.65rem;font-weight:700;color:#fff;margin-top:1px;'>{num}</div>"
-                f"<div><div style='font-size:0.85rem;font-weight:600;color:#e6edf3;'>{title}</div>"
-                f"<div style='font-size:0.75rem;color:#6e7681;'>{desc}</div>"
-                f"</div></div>",
+                f"""<div style="display:flex;align-items:flex-start;gap:10px;
+                               padding:6px 0;border-bottom:1px solid rgba(55,65,81,0.4);">
+                    <div class="alloc-step-num">{num}</div>
+                    <div>
+                        <div style="font-size:0.82rem;font-weight:600;color:#E2E8F0;">{title}</div>
+                        <div style="font-size:0.72rem;color:#4B5563;">{desc}</div>
+                    </div>
+                </div>""",
                 unsafe_allow_html=True,
             )
 
     st.divider()
 
-    # ── Architecture diagram ───────────────────────────────────────────────────
+    # ── Architecture diagram ──────────────────────────────────────────────────
     with st.expander("🏛️ How AllocAI Works — Technical Pipeline", expanded=False):
         st.code(
             """
 Staffing Request
-    → Project Analyzer (AI requirement extraction)
+    → Project Analyser (AI requirement extraction)
     → Candidate Filter (SQL — database skills & availability)
-    → Project Fit Scorer (deterministic weighted scoring)
-    → Hindsight Recall (relevant organizational memories)
+    → Project Fit Scorer (deterministic weighted scoring: 8 dimensions)
+    → Hindsight Recall (relevant organisational memories)
     → RAG Retrieval (company engineering standards)
     → Team Composer (complementary team selection)
     → AI Explanation (evidence-based rationale)
@@ -161,9 +178,8 @@ Staffing Request
 Project Completion
     → Learning Center (outcome + feedback + lessons)
     → Learning Agent (AI lesson extraction)
-    → Hindsight Retain (organizational memory)
+    → Hindsight Retain (organisational memory)
     → Better Future Staffing Recommendations
             """,
             language="text",
         )
-

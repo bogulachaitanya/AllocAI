@@ -1,4 +1,8 @@
-"""Candidate Analysis page."""
+"""Candidate Analysis page — user-friendly employee matching view.
+
+Shows the full employee pool with filtering and scoring.
+Language is HR-friendly — no SQL, database IDs, or technical jargon.
+"""
 
 from __future__ import annotations
 
@@ -18,37 +22,41 @@ from ui.components.score_card import render_candidate_score_card
 
 def render() -> None:
     st.title("🔍 Candidate Analysis")
-    st.caption("Analyze individual candidates against project requirements.")
+    st.caption(
+        "Filter and score your employee pool against project requirements. "
+        "Use the filters to find people with the right skills, experience, and availability."
+    )
 
     st.divider()
 
+    # ── Filters (in sidebar) ──────────────────────────────────────────────────
     with st.sidebar:
-        st.subheader("Filter Criteria")
+        st.markdown(
+            """<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;
+                          letter-spacing:0.08em;color:#6366F1;margin-bottom:8px;">
+                Filters
+            </div>""",
+            unsafe_allow_html=True,
+        )
         required_skills_input = st.text_input(
-            "Required Skills (comma-separated)",
-            placeholder="Python, Machine Learning, AWS",
+            "Required Skills",
+            placeholder="Python, SQL, AWS",
+            help="Comma-separated list of skills employees must have.",
         )
         seniority = st.multiselect(
-            "Seniority",
+            "Seniority Level",
             ["junior", "mid", "senior", "lead", "principal", "staff"],
             default=[],
         )
-        min_years = st.slider("Min Years Experience", 0.0, 20.0, 0.0, 0.5)
+        min_years = st.slider("Minimum Experience (years)", 0.0, 20.0, 0.0, 0.5)
         domain_input = st.text_input("Domain", placeholder="fintech")
-        must_available = st.checkbox("Must be available", value=True)
+        must_available = st.checkbox("Available Only", value=True)
         min_avail = st.slider("Min Availability %", 0, 100, 30)
         project_domain = st.selectbox(
-            "Project Domain (for scoring)",
-            [
-                "general",
-                "fintech",
-                "healthcare",
-                "e-commerce",
-                "cloud",
-                "ml",
-                "cybersecurity",
-                "logistics",
-            ],
+            "Score Against Domain",
+            ["general", "fintech", "healthcare", "e-commerce", "cloud", "ml",
+             "cybersecurity", "logistics", "saas"],
+            help="Domain used for scoring relevance.",
         )
 
     required_skills = (
@@ -76,47 +84,74 @@ def render() -> None:
     with get_db() as session:
         candidate_filter = CandidateFilter(session)
 
-        # 1. Pipeline Metrics
-        metrics = candidate_filter.get_pipeline_metrics(criteria)
+        # ── Pipeline metrics ──────────────────────────────────────────────────
+        try:
+            metrics = candidate_filter.get_pipeline_metrics(criteria)
+        except Exception:
+            metrics = {}
 
-        st.markdown("### Candidate Pipeline Metrics")
-        cols = st.columns(6)
-        cols[0].metric("Total Employees", metrics["total_employees"])
-        cols[1].metric("Available", metrics["available_employees"])
-        cols[2].metric("Skill Match", metrics["skill_matched"])
-        cols[3].metric("Domain Match", metrics["domain_matched"])
-        cols[4].metric("Eligible", metrics["eligible_candidates"])
-        cols[5].metric("Scored", metrics["eligible_candidates"])  # Scored is same as eligible
+        st.markdown(
+            """<div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;
+                          letter-spacing:0.08em;color:#6366F1;margin-bottom:8px;">
+                Employee Matching Pipeline
+            </div>""",
+            unsafe_allow_html=True,
+        )
+
+        col1, col2, col3, col4, col5 = st.columns(5)
+        col1.metric("All Employees", metrics.get("total_employees", "—"))
+        col2.metric("Available", metrics.get("available_employees", "—"))
+        col3.metric("Skills Match", metrics.get("skill_matched", "—"))
+        col4.metric("Domain Match", metrics.get("domain_matched", "—"))
+        col5.metric("Eligible", metrics.get("eligible_candidates", "—"))
 
         st.divider()
 
-        # 2. View Selection (Tabs)
+        # ── Tabs ──────────────────────────────────────────────────────────────
         tab_eligible, tab_all = st.tabs(["✅ Eligible Candidates", "👥 All Employees"])
 
-        # Fetch data
-        all_employees = candidate_filter.get_all_candidates()  # Wait, get_all_candidates applies an availability filter. We should get actually ALL employees
-        # We can just query them directly or use the repository
-        all_emps = (
-            session.query(Employee)
-            .options(
-                __import__("sqlalchemy")
-                .orm.joinedload(Employee.employee_skills)
-                .joinedload(__import__("models.employee").employee.EmployeeSkill.skill),
-                __import__("sqlalchemy").orm.joinedload(Employee.assignments),
+        # Fetch all employees
+        try:
+            all_emps = (
+                session.query(Employee)
+                .options(
+                    __import__("sqlalchemy").orm.joinedload(Employee.employee_skills)
+                    .joinedload(__import__("models.employee").employee.EmployeeSkill.skill),
+                    __import__("sqlalchemy").orm.joinedload(Employee.assignments),
+                )
+                .all()
             )
-            .all()
-        )
+        except Exception:
+            all_emps = []
 
         candidates = candidate_filter.filter_candidates_direct(criteria)
         eligible_ids = {c.id for c in candidates}
-
         scorer = ProjectFitScorer()
 
         with tab_eligible:
-            st.markdown(f"**Showing {len(candidates)} of {metrics['total_employees']} employees**")
+            count = len(candidates)
+            total = metrics.get("total_employees", "?")
+            st.markdown(
+                f"<div style='color:#64748B;font-size:0.83rem;margin-bottom:0.75rem;'>"
+                f"Showing <b style='color:#E2E8F0;'>{count}</b> eligible employees "
+                f"from {total} total</div>",
+                unsafe_allow_html=True,
+            )
 
             if not candidates:
-                st.info("No candidates match the current filter. Try broadening criteria.")
+                st.markdown(
+                    """<div class="alloc-glass" style="padding:2rem;text-align:center;">
+                        <div style="font-size:1.5rem;margin-bottom:0.5rem;">🔍</div>
+                        <div style="font-size:0.95rem;font-weight:600;color:#94A3B8;margin-bottom:0.4rem;">
+                            No employees match the current criteria
+                        </div>
+                        <div style="font-size:0.82rem;color:#4B5563;">
+                            Try broadening your skills list, reducing the minimum experience,
+                            or allowing more availability levels.
+                        </div>
+                    </div>""",
+                    unsafe_allow_html=True,
+                )
             else:
                 scored = scorer.score_many(candidates, dummy_req)
                 for candidate in scored[:50]:
@@ -124,60 +159,49 @@ def render() -> None:
                     evidence_svc = EvidenceService(UserRole.MANAGER)
                     normalized_ev = evidence_svc.from_candidate(candidate)
                     if normalized_ev:
-                        render_evidence_items(
-                            normalized_ev, title="Database Evidence", collapsed=True
-                        )
-                    st.divider()
+                        render_evidence_items(normalized_ev, title="Evidence", collapsed=True)
+                    st.markdown("<hr style='border-color:rgba(55,65,81,0.3);margin:6px 0;'>",
+                                unsafe_allow_html=True)
 
         with tab_all:
-            st.markdown(f"**Showing all {len(all_emps)} employees**")
+            st.markdown(
+                f"<div style='color:#64748B;font-size:0.83rem;margin-bottom:0.75rem;'>"
+                f"All <b style='color:#E2E8F0;'>{len(all_emps)}</b> employees</div>",
+                unsafe_allow_html=True,
+            )
 
-            # Create a simple table view for all employees
             data = []
             for emp in all_emps:
-                # Basic exclusion reason
                 reason = ""
                 if emp.id not in eligible_ids:
-                    if (
-                        not emp.is_available
-                        or emp.availability_percentage < criteria.minimum_availability_percentage
-                    ):
+                    if (not emp.is_available
+                            or emp.availability_percentage < criteria.minimum_availability_percentage):
                         reason = "Unavailable"
                     elif criteria.required_skill_names:
-                        emp_skills = {
-                            es.skill.name.lower() for es in emp.employee_skills if es.skill
-                        }
+                        emp_skills = {es.skill.name.lower() for es in emp.employee_skills if es.skill}
                         req_skills = {s.lower() for s in criteria.required_skill_names}
                         if not req_skills.issubset(emp_skills):
-                            reason = "Missing mandatory skills"
-
+                            reason = "Missing skills"
                     if not reason and criteria.domains:
                         domain_lower = [d.lower() for d in criteria.domains]
                         if not any(d in (emp.domain_expertise or "").lower() for d in domain_lower):
                             reason = "Domain mismatch"
-
                     if not reason and criteria.minimum_years_experience > emp.years_of_experience:
                         reason = "Insufficient experience"
-
                     if not reason:
-                        reason = "Other constraint (e.g., seniority, department)"
+                        reason = "Other criteria"
 
-                # Just grab current tech stack
-                tech_stack = ", ".join([es.skill.name for es in emp.employee_skills if es.skill])
-
-                data.append(
-                    {
-                        "Employee ID": emp.id,
-                        "Name": emp.name,
-                        "Role": emp.role,
-                        "Department": emp.department,
-                        "Experience": emp.years_of_experience,
-                        "Current Tech Stack": tech_stack,
-                        "Availability": f"{emp.availability_percentage}%",
-                        "Location": emp.location or "N/A",
-                        "Projects Completed": len(emp.assignments),
-                        "Eligibility": "✅ Eligible" if emp.id in eligible_ids else f"❌ {reason}",
-                    }
-                )
+                tech_stack = ", ".join(es.skill.name for es in emp.employee_skills if es.skill)
+                data.append({
+                    "Name": emp.name,
+                    "Role": emp.role,
+                    "Department": emp.department,
+                    "Experience (yrs)": emp.years_of_experience,
+                    "Skills": tech_stack,
+                    "Availability": f"{emp.availability_percentage}%",
+                    "Location": emp.location or "N/A",
+                    "Projects Completed": len(emp.assignments),
+                    "Eligibility": "✅ Eligible" if emp.id in eligible_ids else f"❌ {reason}",
+                })
 
             st.dataframe(data, use_container_width=True)
